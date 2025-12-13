@@ -1,0 +1,75 @@
+# Unity generated folders (local caches)
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+[Uu]ser[Ss]ettings/
+[Aa]ssets/[Ss]treamingAssets/aa/*
+[Aa]ssets/[Ss]treamingAssets/aa.meta
+
+# Unity generated files
+*.pidb
+*.pdb
+*.mdb
+*.tmp
+*.bak
+*.old
+*.log
+*.booproj
+*.svd
+*.opendb
+*.VC.db
+*.csproj
+*.csproj.user
+*.unityproj
+*.sln
+*.slnx
+*.user
+*.userprefs
+
+# Burst
+*.burst
+*.burst.debug
+
+# Rider / JetBrains
+.idea/
+*.iml
+.gradle/
+
+# Visual Studio
+.vs/
+
+# VS Code
+.vscode/
+
+# Platform specific
+.DS_Store
+Thumbs.db
+
+# Android / iOS build artifacts
+*.apk
+*.aab
+*.obb
+*.xcworkspace
+*.xcodeproj
+*.xcuserstate
+
+# Addressables and asset bundles
+[Aa]ssets/[Aa]ddressableAssetsData/*/*.bin*
+[Aa]ssets/[Aa]ssetBundles/
+[Aa]ssets/[Ss]treamingAssets/AssetBundles/
+
+# Crash reports
+sysinfo.txt
+
+# Collaborate cache
+[Aa]ssets/CollabMetadata/
+
+# Generated JetBrains Rider plugin (auto)
+[Aa]ssets/Plugins/Editor/JetBrains*Rider*
+
+# TextMesh Pro auto-saved assets
+[Aa]ssets/TextMesh Pro/Sprites/EmojiOne*
