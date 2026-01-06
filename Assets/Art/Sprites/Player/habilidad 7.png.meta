@@ -1,10 +1,22 @@
 fileFormatVersion: 2
-guid: f4a335bd96d4aa947bf7a6b45ebbc987
+guid: c23d4ee4b02657b45b529ffc738f2c58
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3551259361068553128
-    second: Player018_0
+      213: 1401183777858274307
+    second: habilidad 7_0
+  - first:
+      213: -1141261269073999580
+    second: habilidad 7_1
+  - first:
+      213: 6079774988771814661
+    second: habilidad 7_2
+  - first:
+      213: -5757026461336886151
+    second: habilidad 7_3
+  - first:
+      213: -3503369034710337205
+    second: habilidad 7_4
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +125,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Player018_0
+      name: habilidad 7_0
       rect:
         serializedVersion: 2
-        x: 87
-        y: 4
-        width: 208
-        height: 191
+        x: 38
+        y: 16
+        width: 298
+        height: 216
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +140,96 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8a395c1d29b984130800000000000000
-      internalID: 3551259361068553128
+      spriteID: 3044840e831027310800000000000000
+      internalID: 1401183777858274307
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: habilidad 7_1
+      rect:
+        serializedVersion: 2
+        x: 218
+        y: 21
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 429cee42cec6920f0800000000000000
+      internalID: -1141261269073999580
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: habilidad 7_2
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 20
+        width: 8
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50d6c08e323bf5450800000000000000
+      internalID: 6079774988771814661
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: habilidad 7_3
+      rect:
+        serializedVersion: 2
+        x: 244
+        y: 20
+        width: 6
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 974ad797feeea10b0800000000000000
+      internalID: -5757026461336886151
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: habilidad 7_4
+      rect:
+        serializedVersion: 2
+        x: 275
+        y: 23
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b49bcf0bc68816fc0800000000000000
+      internalID: -3503369034710337205
       vertices: []
       indices: 
       edges: []
@@ -148,7 +248,11 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Player018_0: 3551259361068553128
+      habilidad 7_0: 1401183777858274307
+      habilidad 7_1: -1141261269073999580
+      habilidad 7_2: 6079774988771814661
+      habilidad 7_3: -5757026461336886151
+      habilidad 7_4: -3503369034710337205
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

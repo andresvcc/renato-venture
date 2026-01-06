@@ -1,10 +1,22 @@
 fileFormatVersion: 2
-guid: 09fec2654b128ee409c6f16a1b8caaea
+guid: b16562c53c2e3074cbc428bdda7f8afe
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7646391477178873887
-    second: Player017_0
+      213: 105256713786246043
+    second: habilidad 5_0
+  - first:
+      213: -4683336603874500483
+    second: habilidad 5_1
+  - first:
+      213: -8810496406550069853
+    second: habilidad 5_2
+  - first:
+      213: -1506811678369955182
+    second: habilidad 5_3
+  - first:
+      213: -2901011890390437566
+    second: habilidad 5_4
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +125,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Player017_0
+      name: habilidad 5_0
       rect:
         serializedVersion: 2
-        x: 87
-        y: 3
-        width: 208
-        height: 198
+        x: 0
+        y: 16
+        width: 400
+        height: 216
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +140,96 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f1832d249807d1a60800000000000000
-      internalID: 7646391477178873887
+      spriteID: b93447b6c62f57100800000000000000
+      internalID: 105256713786246043
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: habilidad 5_1
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 21
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d70e9721c22710fb0800000000000000
+      internalID: -4683336603874500483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: habilidad 5_2
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 20
+        width: 8
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ad3ab0c234dab580800000000000000
+      internalID: -8810496406550069853
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: habilidad 5_3
+      rect:
+        serializedVersion: 2
+        x: 108
+        y: 20
+        width: 6
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 292495f03cab61be0800000000000000
+      internalID: -1506811678369955182
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: habilidad 5_4
+      rect:
+        serializedVersion: 2
+        x: 139
+        y: 23
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 241f7105e098db7d0800000000000000
+      internalID: -2901011890390437566
       vertices: []
       indices: 
       edges: []
@@ -148,7 +248,11 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Player017_0: 7646391477178873887
+      habilidad 5_0: 105256713786246043
+      habilidad 5_1: -4683336603874500483
+      habilidad 5_2: -8810496406550069853
+      habilidad 5_3: -1506811678369955182
+      habilidad 5_4: -2901011890390437566
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
