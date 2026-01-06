@@ -419,6 +419,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 114231493902538710, guid: 50936cccdb69523458c1b42052ebafff,
         type: 3}
+      propertyPath: m_MovementSmoothing
+      value: 0.0715
+      objectReference: {fileID: 0}
+    - target: {fileID: 114231493902538710, guid: 50936cccdb69523458c1b42052ebafff,
+        type: 3}
       propertyPath: m_WhatIsGround.m_Bits
       value: 53
       objectReference: {fileID: 0}
@@ -7502,13 +7507,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1827387510}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 40.54, y: 1.69, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0.22843578, w: 0.9735591}
+  m_LocalPosition: {x: 43.7988, y: 2.0781, z: 0}
+  m_LocalScale: {x: 2.4246783, y: 1.1382, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 26.41}
 --- !u!1 &1867605369
 GameObject:
   m_ObjectHideFlags: 0
