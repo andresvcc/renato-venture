@@ -3,6 +3,7 @@ using UnityEngine.Events;
 using System.Collections;
 using UnityEngine.SceneManagement;
 
+[DefaultExecutionOrder(-100)]
 public class CharacterController2D : MonoBehaviour
 {
 	[SerializeField] private float m_JumpForce = 400f;							// Amount of force added when the player jumps.
@@ -11,6 +12,10 @@ public class CharacterController2D : MonoBehaviour
 	[SerializeField] private LayerMask m_WhatIsGround;							// A mask determining what is ground to the character
 	[SerializeField] private Transform m_GroundCheck;							// A position marking where to check if the player is grounded.
 	[SerializeField] private Transform m_WallCheck;								//Posicion que controla si el personaje toca una pared
+	[SerializeField] private bool m_AlignToSlope = true;
+	[SerializeField] private float m_SlopeCheckDistance = 0.6f;
+	[SerializeField] private float m_SlopeRotationSpeed = 12f;
+	[SerializeField] private float m_MaxSlopeAngle = 45f;
 
 	const float k_GroundedRadius = .2f; // Radius of the overlap circle to determine if grounded
 	private bool m_Grounded;            // Whether or not the player is grounded.
@@ -128,6 +133,30 @@ public class CharacterController2D : MonoBehaviour
 				m_Rigidbody2D.linearVelocity = new Vector2(0, m_Rigidbody2D.linearVelocity.y);
 			}
 		}
+
+		UpdateSlopeAlignment();
+	}
+
+	private void UpdateSlopeAlignment()
+	{
+		if (!m_AlignToSlope)
+			return;
+
+		float targetAngle = 0f;
+
+		if (m_Grounded && !isWallSliding && !isDashing)
+		{
+			RaycastHit2D hit = Physics2D.Raycast(m_GroundCheck.position, Vector2.down, m_SlopeCheckDistance, m_WhatIsGround);
+			if (hit.collider != null)
+			{
+				float angle = Vector2.SignedAngle(Vector2.up, hit.normal);
+				if (Mathf.Abs(angle) <= m_MaxSlopeAngle)
+					targetAngle = angle;
+			}
+		}
+
+		float newAngle = Mathf.LerpAngle(m_Rigidbody2D.rotation, targetAngle, m_SlopeRotationSpeed * Time.fixedDeltaTime);
+		m_Rigidbody2D.MoveRotation(newAngle);
 	}
 
 
