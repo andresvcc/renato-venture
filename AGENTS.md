@@ -1,5 +1,6 @@
 # Repository Guidelines
 
+
 ## Project Structure & Module Organization
 - Code: `Assets/Scripts` (`Player`, `Enemies`, `Environment`, `AnimationStates`). One MonoBehaviour per file; filenames mirror class names.
 - Visuals & animation: `Assets/Animations` (anim/animator controllers), `Assets/Art/Sprites` (PNG sprites and sprite sheets).
