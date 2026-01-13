@@ -6,7 +6,6 @@ public class CameraFollow : MonoBehaviour
 {
 	public float FollowSpeed = 2f;
 	public Transform Target;
-	public Vector2 DeadZone = new Vector2(1.5f, 0.75f);
 
 	// Transform of the camera to shake. Grabs the gameObject's transform
 	// if null.
@@ -23,7 +22,7 @@ public class CameraFollow : MonoBehaviour
 
 	void Awake()
 	{
-		Cursor.visible = false;
+		/*Cursor.visible = false;*/
 		if (camTransform == null)
 		{
 			camTransform = GetComponent(typeof(Transform)) as Transform;
@@ -37,24 +36,9 @@ public class CameraFollow : MonoBehaviour
 
 	private void Update()
 	{
-		if (Target == null)
-			return;
-
-		Vector3 targetPosition = Target.position;
-		targetPosition.z = -10f;
-
-		Vector3 currentPosition = camTransform.position;
-		Vector3 newPosition = currentPosition;
-		Vector3 delta = targetPosition - currentPosition;
-
-		if (Mathf.Abs(delta.x) > DeadZone.x)
-			newPosition.x = targetPosition.x - Mathf.Sign(delta.x) * DeadZone.x;
-
-		if (Mathf.Abs(delta.y) > DeadZone.y)
-			newPosition.y = targetPosition.y - Mathf.Sign(delta.y) * DeadZone.y;
-
-		newPosition.z = targetPosition.z;
-		camTransform.position = Vector3.Slerp(currentPosition, newPosition, FollowSpeed * Time.deltaTime);
+		Vector3 newPosition = Target.position;
+		newPosition.z = -10;
+		transform.position = Vector3.Slerp(transform.position, newPosition, FollowSpeed * Time.deltaTime);
 
 		if (shakeDuration > 0)
 		{

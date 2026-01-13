@@ -3,22 +3,14 @@ using UnityEngine.Events;
 using System.Collections;
 using UnityEngine.SceneManagement;
 
-[DefaultExecutionOrder(-100)]
 public class CharacterController2D : MonoBehaviour
 {
-	[SerializeField] private float m_JumpForce = 850f;							// Amount of force added when the player jumps.
-	[Range(0, .3f)] [SerializeField] private float m_MovementSmoothing = .05f;	// How much to smooth out the movement
-	[SerializeField] private bool m_AirControl = true;							// Whether or not a player can steer while jumping;
-	[SerializeField] private LayerMask m_WhatIsGround;							// A mask determining what is ground to the character
-	[SerializeField] private Transform m_GroundCheck;							// A position marking where to check if the player is grounded.
-	[SerializeField] private Transform m_WallCheck;								//Posicion que controla si el personaje toca una pared
-	[SerializeField] private bool m_AlignToSlope = true;
-	[SerializeField] private float m_SlopeCheckDistance = 0.6f;
-	[SerializeField] private float m_SlopeRotationSpeed = 12f;
-	[SerializeField] private float m_MaxSlopeAngle = 45f;
-	[SerializeField] private float m_CoyoteTime = 0.1f;
-	[SerializeField] private float m_DoubleJumpApexTolerance = 2.5f;
-	[SerializeField] private float m_DoubleJumpMultiplier = 0.85f;
+	[SerializeField] private float m_JumpForce = 400f;                          // Amount of force added when the player jumps.
+	[Range(0, .3f)][SerializeField] private float m_MovementSmoothing = .05f;   // How much to smooth out the movement
+	[SerializeField] private bool m_AirControl = false;                         // Whether or not a player can steer while jumping;
+	[SerializeField] private LayerMask m_WhatIsGround;                          // A mask determining what is ground to the character
+	[SerializeField] private Transform m_GroundCheck;                           // A position marking where to check if the player is grounded.
+	[SerializeField] private Transform m_WallCheck;                             //Posicion que controla si el personaje toca una pared
 
 	const float k_GroundedRadius = .2f; // Radius of the overlap circle to determine if grounded
 	private bool m_Grounded;            // Whether or not the player is grounded.
@@ -48,9 +40,36 @@ public class CharacterController2D : MonoBehaviour
 	private float jumpWallStartX = 0;
 	private float jumpWallDistX = 0; //Distance between player and wall
 	private bool limitVelOnWallJump = false; //For limit wall jump distance with low fps
-	private float m_CoyoteTimeCounter = 0f;
 
-	[Header("Events")]
+
+	// natation
+	[Header("Water / Swimming")]
+	public bool inWater = false;
+	public float waterGravityScale = 0.5f;      // gravityScale while swimming (smaller)
+	public float normalGravityScale = 1f;       // saved default (will be set in Awake)
+	public float waterDrag = 3f;                // drag in water
+	public float normalDrag = 0f;               // saved default
+	public float swimHorizontalSpeed = 6f;      // horizontal swim speed (tunable)
+	public float swimVerticalSpeed = 4f;        // vertical swim speed (tunable)
+	public float swimSmooth = 0.12f;            // smoothing when setting swim velocity
+	public float exitWaterRestoreTime = 0.25f;  // smooth restore time for gravity
+	public float waterExitJumpForce = 1800f;     // force to jump out near surface
+	public float waterSurfaceExitOffset = 0.2f; // how far below surface can still exit
+	public float waterSurfaceSwimLimitOffset = 0.5f; // clamp swim-up to stay below surface
+	public float waterSurfaceRearmOffset = 1.2f; // how far below surface to rearm exit jump
+	public float waterExitInputBufferTime = 0.2f; // time window to queue exit jump
+	private Coroutine exitWaterCoroutine = null;
+	private float waterSurfaceY = float.NegativeInfinity;
+	private bool hasWaterSurface = false;
+	private bool waterExitJumpConsumed = false;
+	private float waterExitBufferedUntil = 0f;
+	private bool waterEntrySinkActive = false;
+
+	//colliders
+	public  CapsuleCollider2D horizontalCapsuleCollider2D;
+    public CapsuleCollider2D verticalCapsuleCollider2D;
+
+    [Header("Events")]
 	[Space]
 
 	public UnityEvent OnFallEvent;
@@ -64,11 +83,20 @@ public class CharacterController2D : MonoBehaviour
 		m_Rigidbody2D = GetComponent<Rigidbody2D>();
 		animator = GetComponent<Animator>();
 
+
+		normalGravityScale = m_Rigidbody2D.gravityScale;
+		normalDrag = m_Rigidbody2D.linearDamping;
+
+
 		if (OnFallEvent == null)
 			OnFallEvent = new UnityEvent();
 
 		if (OnLandEvent == null)
 			OnLandEvent = new UnityEvent();
+
+
+
+
 	}
 
 
@@ -84,21 +112,16 @@ public class CharacterController2D : MonoBehaviour
 		{
 			if (colliders[i].gameObject != gameObject)
 				m_Grounded = true;
-				if (!wasGrounded )
-				{
-					OnLandEvent.Invoke();
-					if (!m_IsWall && !isDashing) 
-						particleJumpDown.Play();
-					canDoubleJump = true;
-					if (m_Rigidbody2D.linearVelocity.y < 0f)
-						limitVelOnWallJump = false;
-				}
+			if (!wasGrounded)
+			{
+				OnLandEvent.Invoke();
+				if (!m_IsWall && !isDashing)
+					particleJumpDown.Play();
+				canDoubleJump = true;
+				if (m_Rigidbody2D.linearVelocity.y < 0f)
+					limitVelOnWallJump = false;
+			}
 		}
-
-		if (m_Grounded)
-			m_CoyoteTimeCounter = m_CoyoteTime;
-		else
-			m_CoyoteTimeCounter = Mathf.Max(0f, m_CoyoteTimeCounter - Time.fixedDeltaTime);
 
 		m_IsWall = false;
 
@@ -122,56 +145,80 @@ public class CharacterController2D : MonoBehaviour
 			if (m_Rigidbody2D.linearVelocity.y < -0.5f)
 				limitVelOnWallJump = false;
 			jumpWallDistX = (jumpWallStartX - transform.position.x) * transform.localScale.x;
-			if (jumpWallDistX < -0.5f && jumpWallDistX > -1f) 
+			if (jumpWallDistX < -0.5f && jumpWallDistX > -1f)
 			{
 				canMove = true;
 			}
-			else if (jumpWallDistX < -1f && jumpWallDistX >= -2f) 
+			else if (jumpWallDistX < -1f && jumpWallDistX >= -2f)
 			{
 				canMove = true;
 				m_Rigidbody2D.linearVelocity = new Vector2(10f * transform.localScale.x, m_Rigidbody2D.linearVelocity.y);
 			}
-			else if (jumpWallDistX < -2f) 
+			else if (jumpWallDistX < -2f)
 			{
 				limitVelOnWallJump = false;
 				m_Rigidbody2D.linearVelocity = new Vector2(0, m_Rigidbody2D.linearVelocity.y);
 			}
-			else if (jumpWallDistX > 0) 
+			else if (jumpWallDistX > 0)
 			{
 				limitVelOnWallJump = false;
 				m_Rigidbody2D.linearVelocity = new Vector2(0, m_Rigidbody2D.linearVelocity.y);
 			}
 		}
-
-		UpdateSlopeAlignment();
 	}
 
-	private void UpdateSlopeAlignment()
-	{
-		if (!m_AlignToSlope)
+
+    public void Move(float move, bool jump, bool dash, float verticalInput, bool jumpHeld, bool axisUp)
+    {
+
+
+        if (inWater)
+        {
+			if (waterEntrySinkActive && hasWaterSurface)
+			{
+				if (IsBelowWaterSurfaceEntrySink())
+				{
+					waterEntrySinkActive = false;
+				}
+				else
+				{
+					verticalInput = -1f;
+					waterExitBufferedUntil = 0f;
+				}
+			}
+
+			if (waterExitJumpConsumed && IsBelowWaterSurfaceRearm())
+			{
+				waterExitJumpConsumed = false;
+			}
+
+			bool wantsWaterExit = !waterEntrySinkActive && (jumpHeld || jump);
+			if (wantsWaterExit)
+			{
+				waterExitBufferedUntil = Time.time + waterExitInputBufferTime;
+			}
+
+			bool hasBufferedExit = !waterEntrySinkActive && Time.time <= waterExitBufferedUntil;
+			if (!waterEntrySinkActive && !wantsWaterExit && axisUp && IsAtWaterSurfaceLimit())
+			{
+				verticalInput = 0f;
+				if (m_Rigidbody2D.linearVelocity.y > 0f)
+					m_Rigidbody2D.linearVelocity = new Vector2(m_Rigidbody2D.linearVelocity.x, 0f);
+			}
+
+			bool isApproachingSurface = verticalInput > 0f || m_Rigidbody2D.linearVelocity.y >= 0f;
+			if (hasBufferedExit && !waterExitJumpConsumed && IsAtWaterSurface() && isApproachingSurface)
+			{
+				WaterExitJump();
+				waterExitJumpConsumed = true;
+			}
+
+			SwimMove(move, verticalInput, jump, dash);
 			return;
-
-		float targetAngle = 0f;
-
-		if (m_Grounded && !isWallSliding && !isDashing)
+        }
+		waterExitJumpConsumed = false;
+        if (canMove)
 		{
-			RaycastHit2D hit = Physics2D.Raycast(m_GroundCheck.position, Vector2.down, m_SlopeCheckDistance, m_WhatIsGround);
-			if (hit.collider != null)
-			{
-				float angle = Vector2.SignedAngle(Vector2.up, hit.normal);
-				if (Mathf.Abs(angle) <= m_MaxSlopeAngle)
-					targetAngle = angle;
-			}
-		}
-
-		float newAngle = Mathf.LerpAngle(m_Rigidbody2D.rotation, targetAngle, m_SlopeRotationSpeed * Time.fixedDeltaTime);
-		m_Rigidbody2D.MoveRotation(newAngle);
-	}
-
-
-	public void Move(float move, bool jump, bool dash)
-	{
-		if (canMove) {
 			if (dash && canDash && !isWallSliding)
 			{
 				//m_Rigidbody2D.AddForce(new Vector2(transform.localScale.x * m_DashForce, 0f));
@@ -206,24 +253,22 @@ public class CharacterController2D : MonoBehaviour
 				}
 			}
 			// If the player should jump...
-			if ((m_Grounded || m_CoyoteTimeCounter > 0f) && jump)
+			if (m_Grounded && jump)
 			{
 				// Add a vertical force to the player.
 				animator.SetBool("IsJumping", true);
-				animator.SetBool("IsDoubleJumping", false);
 				animator.SetBool("JumpUp", true);
 				m_Grounded = false;
-				m_CoyoteTimeCounter = 0f;
 				m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
 				canDoubleJump = true;
 				particleJumpDown.Play();
 				particleJumpUp.Play();
 			}
-			else if (!m_Grounded && jump && canDoubleJump && !isWallSliding && m_Rigidbody2D.linearVelocity.y <= m_DoubleJumpApexTolerance)
+			else if (!m_Grounded && jump && canDoubleJump && !isWallSliding)
 			{
 				canDoubleJump = false;
 				m_Rigidbody2D.linearVelocity = new Vector2(m_Rigidbody2D.linearVelocity.x, 0);
-				m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce * m_DoubleJumpMultiplier));
+				m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce / 1.2f));
 				animator.SetBool("IsDoubleJumping", true);
 			}
 
@@ -246,7 +291,7 @@ public class CharacterController2D : MonoBehaviour
 					{
 						StartCoroutine(WaitToEndSliding());
 					}
-					else 
+					else
 					{
 						oldWallSlidding = true;
 						m_Rigidbody2D.linearVelocity = new Vector2(-transform.localScale.x * 2, -5);
@@ -256,9 +301,9 @@ public class CharacterController2D : MonoBehaviour
 				if (jump && isWallSliding)
 				{
 					animator.SetBool("IsJumping", true);
-					animator.SetBool("JumpUp", true); 
+					animator.SetBool("JumpUp", true);
 					m_Rigidbody2D.linearVelocity = new Vector2(0f, 0f);
-					m_Rigidbody2D.AddForce(new Vector2(transform.localScale.x * m_JumpForce *1.2f, m_JumpForce));
+					m_Rigidbody2D.AddForce(new Vector2(transform.localScale.x * m_JumpForce * 1.2f, m_JumpForce));
 					jumpWallStartX = transform.position.x;
 					limitVelOnWallJump = true;
 					canDoubleJump = true;
@@ -278,7 +323,7 @@ public class CharacterController2D : MonoBehaviour
 					StartCoroutine(DashCooldown());
 				}
 			}
-			else if (isWallSliding && !m_IsWall && canCheck) 
+			else if (isWallSliding && !m_IsWall && canCheck)
 			{
 				isWallSliding = false;
 				animator.SetBool("IsWallSliding", false);
@@ -301,13 +346,13 @@ public class CharacterController2D : MonoBehaviour
 		transform.localScale = theScale;
 	}
 
-	public void ApplyDamage(float damage, Vector3 position) 
+	public void ApplyDamage(float damage, Vector3 position)
 	{
 		if (!invincible)
 		{
 			animator.SetBool("Hit", true);
 			life -= damage;
-			Vector2 damageDir = Vector3.Normalize(transform.position - position) * 40f ;
+			Vector2 damageDir = Vector3.Normalize(transform.position - position) * 40f;
 			m_Rigidbody2D.linearVelocity = Vector2.zero;
 			m_Rigidbody2D.AddForce(damageDir * 10);
 			if (life <= 0)
@@ -333,13 +378,13 @@ public class CharacterController2D : MonoBehaviour
 		canDash = true;
 	}
 
-	IEnumerator Stun(float time) 
+	IEnumerator Stun(float time)
 	{
 		canMove = false;
 		yield return new WaitForSeconds(time);
 		canMove = true;
 	}
-	IEnumerator MakeInvincible(float time) 
+	IEnumerator MakeInvincible(float time)
 	{
 		invincible = true;
 		yield return new WaitForSeconds(time);
@@ -380,4 +425,164 @@ public class CharacterController2D : MonoBehaviour
 		yield return new WaitForSeconds(1.1f);
 		SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
 	}
+
+
+
+
+
+
+    private void SwimMove(float move, float vertical, bool jump, bool dash)
+    {
+        float targetVX = move * swimHorizontalSpeed;
+        float targetVY = vertical * swimVerticalSpeed;
+
+
+        if (Mathf.Abs(targetVX) < 0.05f) targetVX = 0f;
+        if (Mathf.Abs(targetVY) < 0.05f) targetVY = 0f;
+
+        Vector2 targetVelocity = new Vector2(targetVX, targetVY);
+        m_Rigidbody2D.linearVelocity = Vector2.Lerp(
+            m_Rigidbody2D.linearVelocity,
+            targetVelocity,
+            Time.fixedDeltaTime * 5f
+        );
+
+        if (move > 0 && !m_FacingRight) Flip();
+        else if (move < 0 && m_FacingRight) Flip();
+
+        animator.SetFloat("SwimVertical", m_Rigidbody2D.linearVelocity.y);
+        animator.SetFloat("SwimHorizontal", m_Rigidbody2D.linearVelocity.x);
+
+        animator.SetFloat("SwimInputX", Mathf.Abs(move));
+        animator.SetFloat("SwimInputY", Mathf.Abs(vertical));
+
+    }
+
+	private float GetActiveColliderTopY()
+	{
+		if (horizontalCapsuleCollider2D != null && horizontalCapsuleCollider2D.enabled)
+			return horizontalCapsuleCollider2D.bounds.max.y;
+		if (verticalCapsuleCollider2D != null && verticalCapsuleCollider2D.enabled)
+			return verticalCapsuleCollider2D.bounds.max.y;
+		return transform.position.y;
+	}
+
+	private bool IsAtWaterSurface()
+	{
+		if (!hasWaterSurface)
+			return false;
+
+		return GetActiveColliderTopY() >= waterSurfaceY - waterSurfaceExitOffset;
+	}
+
+	private bool IsAtWaterSurfaceLimit()
+	{
+		if (!hasWaterSurface)
+			return false;
+
+		return GetActiveColliderTopY() >= waterSurfaceY - waterSurfaceSwimLimitOffset;
+	}
+
+	private bool IsBelowWaterSurfaceRearm()
+	{
+		if (!hasWaterSurface)
+			return false;
+
+		return GetActiveColliderTopY() <= waterSurfaceY - waterSurfaceRearmOffset;
+	}
+
+	private bool IsBelowWaterSurfaceEntrySink()
+	{
+		if (!hasWaterSurface)
+			return false;
+
+		return GetActiveColliderTopY() <= waterSurfaceY - waterSurfaceSwimLimitOffset;
+	}
+
+	private void WaterExitJump()
+	{
+		if (waterExitJumpForce <= 0f)
+			return;
+
+		m_Rigidbody2D.linearVelocity = new Vector2(m_Rigidbody2D.linearVelocity.x, 0f);
+		m_Rigidbody2D.AddForce(new Vector2(0f, waterExitJumpForce));
+	}
+
+	public void SetWaterSurfaceY(float surfaceY)
+	{
+		waterSurfaceY = surfaceY;
+		hasWaterSurface = true;
+	}
+
+
+    ///Water
+    public void SetInWater(bool val)
+    {
+        if (inWater == val) return;
+
+        inWater = val;
+		waterExitJumpConsumed = false;
+		waterExitBufferedUntil = 0f;
+		waterEntrySinkActive = inWater && hasWaterSurface;
+
+        if (exitWaterCoroutine != null)
+        {
+            StopCoroutine(exitWaterCoroutine);
+            exitWaterCoroutine = null;
+        }
+
+        if (inWater)
+        {
+            animator.Play("SwimIdle");
+            horizontalCapsuleCollider2D.enabled = true;
+            verticalCapsuleCollider2D.enabled = false;
+
+
+            horizontalCapsuleCollider2D.isTrigger = false;
+            verticalCapsuleCollider2D.isTrigger = true;
+            // Enter water
+            m_Rigidbody2D.gravityScale = waterGravityScale;
+            m_Rigidbody2D.linearDamping = waterDrag;
+            animator.SetBool("IsSwimming", true);
+            canDoubleJump = false; 
+
+           
+        }
+        else
+        {
+          
+            // Exit water -> restore smoothly
+            exitWaterCoroutine = StartCoroutine(RestoreFromWater());
+            animator.SetBool("IsSwimming", false);
+            canDoubleJump = true;
+			hasWaterSurface = false;
+			waterSurfaceY = float.NegativeInfinity;
+       
+        }
+    }
+
+    private IEnumerator RestoreFromWater()
+    {
+        float startG = m_Rigidbody2D.gravityScale;
+        float startDrag = m_Rigidbody2D.linearDamping;
+        float t = 0f;
+        while (t < exitWaterRestoreTime)
+        {
+            t += Time.deltaTime;
+            float f = t / exitWaterRestoreTime;
+            m_Rigidbody2D.gravityScale = Mathf.Lerp(startG, normalGravityScale, f);
+            m_Rigidbody2D.linearDamping = Mathf.Lerp(startDrag, normalDrag, f);
+            yield return null;
+        }
+        m_Rigidbody2D.gravityScale = normalGravityScale;
+        m_Rigidbody2D.linearDamping = normalDrag;
+        exitWaterCoroutine = null;
+
+        horizontalCapsuleCollider2D.enabled = false;
+        verticalCapsuleCollider2D.enabled = true;
+
+
+        horizontalCapsuleCollider2D.isTrigger = true;
+        verticalCapsuleCollider2D.isTrigger = false;
+    }
 }

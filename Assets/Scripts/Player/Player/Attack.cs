@@ -14,9 +14,13 @@ public class Attack : MonoBehaviour
 
 	public GameObject cam;
 
-	private void Awake()
+
+    public CharacterController2D controller;
+
+    private void Awake()
 	{
-		m_Rigidbody2D = GetComponent<Rigidbody2D>();
+        controller = GetComponent<CharacterController2D>();	
+        m_Rigidbody2D = GetComponent<Rigidbody2D>();
 	}
 
 	// Start is called before the first frame update
@@ -28,12 +32,27 @@ public class Attack : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-		if (Input.GetKeyDown(KeyCode.X) && canAttack)
+        if (Input.GetKeyDown(KeyCode.X) && canAttack)
+        {
+            canAttack = false;
+            if (controller != null && controller.inWater)
+            {
+                animator.SetBool("IsAttacking", true);
+                animator.SetTrigger("UnderwaterAttack"); // créer trigger dans Animator
+            }
+            else
+            {
+                animator.SetBool("IsAttacking", true);
+            }
+            StartCoroutine(AttackCooldown());
+        }
+
+     /*   if (Input.GetKeyDown(KeyCode.X) && canAttack)
 		{
 			canAttack = false;
 			animator.SetBool("IsAttacking", true);
 			StartCoroutine(AttackCooldown());
-		}
+		}*/
 
 		if (Input.GetKeyDown(KeyCode.V))
 		{
@@ -48,7 +67,11 @@ public class Attack : MonoBehaviour
 	{
 		yield return new WaitForSeconds(0.25f);
 		canAttack = true;
-	}
+	
+
+    }
+
+
 
 	public void DoDashDamage()
 	{
